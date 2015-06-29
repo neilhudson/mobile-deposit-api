@@ -1,7 +1,7 @@
 def buildVersion = null
 stage 'build'
 node('docker') {
-//    docker.withServer('tcp://192.168.7.101:1234'){
+//    docker.withServer('tcp://docker.local:1234'){
             docker.image('kmadel/maven:3.3.3-jdk-8').inside('-v /data:/data') {
                 sh 'rm -rf *'
                 checkout([$class: 'GitSCM', branches: [[name: '*/master']], clean: true, doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'ab2d3ee0-76a0-4da3-a86d-7e2574a861bd', url: 'https://github.com/harniman/mobile-deposit-api.git']]])
@@ -13,14 +13,15 @@ node('docker') {
                 writeFile file: '/data/mvn/settings.xml', text: "<settings><localRepository>/data/mvn/.m2repo</localRepository></settings>"
 
                 sh 'mvn -s /data/mvn/settings.xml clean package'
+                
 
                 stage 'sonar analysis'
-//                sh 'mvn -s /data/mvn/settings.xml sonar:sonar'
+                sh 'mvn -s /data/mvn/settings.xml sonar:sonar'
 
                 stage 'integration-test'
-//                sh 'mvn -s /data/mvn/settings.xml  verify'
+                sh 'mvn -s /data/mvn/settings.xml  verify'
 
-//                step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+                step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
 
                 stage 'prepare release'
                 def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
@@ -31,12 +32,14 @@ node('docker') {
                 matcher = null
             }
 
-            docker.withServer('tcp://192.168.99.101:2376', 'slave-docker-us-east-1-tls'){
+            docker.withServer('tcp://192.168.99.100:2376', 'slave-docker-us-east-1-tls'){
 
                 stage 'build docker image'
                 def mobileDepositApiImage
-                dir('target') {
-                    sh "docker ps -a"
+                dir('.docker') {
+                    sh "ls -l ../target"
+                    sh "mv ../target/*-SNAPSHOT.jar  mobile-deposit-api.jar"
+                    sh "ls -l "
                     mobileDepositApiImage = docker.build "harniman/mobile-deposit-api:${buildVersion}"
                 }
     
@@ -53,11 +56,24 @@ node('docker') {
     //          sh 'curl -H "Content-Type: application/json" -X POST -d \'{"push_data": {"pushed_at": 1434386606, "images": null, "pusher": "harniman"}, "callback_url": "https://registry.hub.docker.com/u/harniman/mobile-bank-api/hook/21a0ic0dje2ff4hg3f3hbg23b5220454b/", "repository": {"status": "Active", "description": "", "is_trusted": false, "full_description": "", "repo_url": "https://registry.hub.docker.com/u/harniman/mobile-bank-api/", "owner": "harniman", "is_official": false, "is_private": false, "name": "mobile-bank-api", "namespace": "harniman", "star_count": 0, "comment_count": 0, "date_created": 1434385021, "repo_name": "harniman/mobile-bank-api"}}\' http://webhook:13461862c863d7df39e63435eb17deb9@jenkins-latest.beedemo.net/mobile-team/dockerhub-webhook/notify'
     // 
     
-                
-                docker.withRegistry(credentialsId: 'dockerhub-harniman') {
+//                echo "TODO HOME=${env.HOME}"
+//                withEnv(['DOCKER_REGISTRY_URL=']) {sh 'env'}
+//                withDockerRegistry(registry: [url: null, credentialsId: 'dockerhub-harniman']) {echo 'wDR'}
+echo 'TODO wR'
+//                docker.withRegistry(url: 'https://index.docker.io/v1/', credentialsId: 'dockerhub-harniman') {
+//                    mobileDepositApiImage.push()
+//                }
+/*  docker.node {
+docker.script.withEnv(["DOCKER_REGISTRY_URL="]) {
+docker.script.withDockerRegistry(registry: [url: null, credentialsId: 'dockerhub-harniman']) {
                     mobileDepositApiImage.push()
-                }
-        
-            }
+}
+}
+}      
+            }*/
+withDockerRegistry(registry: [credentialsId: 'dockerhub-harniman']) {
+                    mobileDepositApiImage.push()
+}
+}
 //  }
 }
