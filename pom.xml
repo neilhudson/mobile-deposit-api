@@ -32,12 +32,14 @@
         </developer>
     </developers>
 
+<!-- Commenting out SCM config as it seems to break Sonar 
     <scm>
         <url>https://github.com/cloudbees/mobile-deposit-api</url>
         <connection>scm:git:https://github.com/cloudbees/mobile-deposit-api.git</connection>
         <developerConnection>scm:git:https://github.com/cloudbees/mobile-deposit-api.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+-->
 
     <organization>
         <name>CloudBees, Inc.</name>
