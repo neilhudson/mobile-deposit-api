@@ -32,14 +32,12 @@
         </developer>
     </developers>
 
-<!-- Commenting out SCM config as it seems to break Sonar 
     <scm>
         <url>https://github.com/cloudbees/mobile-deposit-api</url>
         <connection>scm:git:https://github.com/cloudbees/mobile-deposit-api.git</connection>
         <developerConnection>scm:git:https://github.com/cloudbees/mobile-deposit-api.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
--->
 
     <organization>
         <name>CloudBees, Inc.</name>
@@ -52,10 +50,10 @@
 
 
         <!-- (1) Sonar connection properties - typically specified on commandline -->
-        <!-- <sonar.host.url>http://sonar.beedemo.net:9000</sonar.host.url>
-        <sonar.jdbc.url>jdbc:postgresql://sonar.beedemo.net:5432/sonar</sonar.jdbc.url>
+        <sonar.host.url>http://sonar.beedemo.local:9000</sonar.host.url>
+        <sonar.jdbc.url>jdbc:postgresql://sonar.beedemo.local:5432/sonar</sonar.jdbc.url>
         <sonar.jdbc.username>sonar</sonar.jdbc.username>
-        <sonar.jdbc.password>xaexohquaetiesoo</sonar.jdbc.password> -->
+        <sonar.jdbc.password>xaexohquaetiesoo</sonar.jdbc.password>
         <!-- end (1) -->
 
         <!-- (2) Help Sonar to be sure about language and version -->

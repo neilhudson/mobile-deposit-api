@@ -16,7 +16,7 @@ node('docker') {
                 
 
                 stage 'sonar analysis'
-                sh 'mvn -s /data/mvn/settings.xml sonar:sonar'
+                sh 'mvn -s /data/mvn/settings.xml -Dsonar.scm.disabled=True sonar:sonar'
 
                 stage 'integration-test'
                 sh 'mvn -s /data/mvn/settings.xml  verify'
