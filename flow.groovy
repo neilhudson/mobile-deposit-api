@@ -16,10 +16,10 @@ node('docker') {
                 
 
 
-                sh 'grep sonar pom.xml'
                 stage 'sonar analysis'
-                sh 'mvn -s /data/mvn/settings.xml -Dsonar.scm.disabled=True sonar:sonar'
-
+                //sh 'mvn -s /data/mvn/settings.xml -Dsonar.scm.disabled=True sonar:sonar'
+                echo "would run sonar here"
+                
                 stage 'integration-test'
                 sh 'mvn -s /data/mvn/settings.xml  verify'
 
