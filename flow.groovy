@@ -1,5 +1,5 @@
 def buildVersion = null
-stage 'build'
+stage 'Build App'
 node('docker') {
 //    docker.withServer('tcp://docker.local:1234'){
             docker.image('kmadel/maven:3.3.3-jdk-8').inside('-v /data:/data') {
@@ -16,16 +16,16 @@ node('docker') {
                 
 
 
-                stage 'sonar analysis'
+                stage 'Sonar analysis'
                 //sh 'mvn -s settings.xml -Dsonar.scm.disabled=True sonar:sonar'
                 echo "would run sonar here"
                 
-                stage 'integration-test'
+                stage 'Integration-test'
                 sh 'mvn -s settings.xml  verify'
 
                 step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
 
-                stage 'prepare release'
+                stage 'Prepare release'
                 def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
                 if (matcher) {
                     buildVersion = matcher[0][1]
@@ -36,7 +36,7 @@ node('docker') {
 
             docker.withServer('tcp://192.168.99.100:2376', 'slave-docker-us-east-1-tls'){
 
-                stage 'build docker image'
+                stage 'Build Docker image'
                 def mobileDepositApiImage
                 dir('.docker') {
                     sh "ls -l ../target"
@@ -45,7 +45,7 @@ node('docker') {
                     mobileDepositApiImage = docker.build "harniman/mobile-deposit-api:${buildVersion}"
                 }
     
-                stage 'deploy to production'
+                stage 'Test Docker image'
                 try{
                   sh "docker stop mobile-deposit-api"
                   sh "docker rm mobile-deposit-api"
@@ -54,7 +54,7 @@ node('docker') {
                 }
                 mobileDepositApiImage.run("--name mobile-deposit-api -p 8080:8080")
     
-                stage 'publish docker image'
+                stage 'Publish Docker image'
                 withDockerRegistry(registry: [credentialsId: 'dockerhub-harniman']) {
                     mobileDepositApiImage.push()
                 }
