@@ -10,18 +10,18 @@ node('docker') {
                 sh 'git config user.name "nharniman"'
                 sh 'git remote set-url origin git@github.com:harniman/mobile-deposit-api.git'
                 sh "mkdir -p /data/mvn"
-                writeFile file: '/data/mvn/settings.xml', text: "<settings><localRepository>/data/mvn/.m2repo</localRepository></settings>"
+                writeFile file: 'settings.xml', text: "<settings><localRepository>/data/.m2repo</localRepository></settings>"
 
-                sh 'mvn -s /data/mvn/settings.xml clean package'
+                sh 'mvn -s settings.xml clean package'
                 
 
 
                 stage 'sonar analysis'
-                //sh 'mvn -s /data/mvn/settings.xml -Dsonar.scm.disabled=True sonar:sonar'
+                //sh 'mvn -s settings.xml -Dsonar.scm.disabled=True sonar:sonar'
                 echo "would run sonar here"
                 
                 stage 'integration-test'
-                sh 'mvn -s /data/mvn/settings.xml  verify'
+                sh 'mvn -s settings.xml  verify'
 
                 step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
 
