@@ -63,8 +63,6 @@ node('docker') {
                 --data-urlencode imageName=harniman/mobile-deposit-api"
         echo "Run cucumber tests here"
         
-        container.stop()
-
         sh "curl http://webhook:6e8d9beba74b7f0ae921e1d38a9c448f@mymac:8080/docker-traceability/submitContainerStatus \
             --data-urlencode status=stopped \
             --data-urlencode inspectData=\"\$(docker inspect $container.id)\" \
@@ -72,6 +70,8 @@ node('docker') {
             --data-urlencode hostName=mymac \
             --data-urlencode imageName=harniman/mobile-deposit-api"
 
+            container.stop()
+            
         stage 'Publish Docker image'
         withDockerRegistry(registry: [credentialsId: 'dockerhub-harniman']) { 
             mobileDepositApiImage.push() }
