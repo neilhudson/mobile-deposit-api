@@ -5,12 +5,12 @@ node('docker') {
     docker.image('kmadel/maven:3.3.3-jdk-8').inside('-v /data:/data') {
         sh 'rm -rf *'
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], clean: true, doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [
-                [credentialsId: 'ab2d3ee0-76a0-4da3-a86d-7e2574a861bd', url: 'https://github.com/harniman/mobile-deposit-api.git']
+                [credentialsId: 'ab2d3ee0-76a0-4da3-a86d-7e2574a861bd', url: 'https://github.com/neilhudson/mobile-deposit-api.git']
             ]])
         sh 'git checkout master'
-        sh 'git config user.email "nigel@harniman.net"'
-        sh 'git config user.name "nharniman"'
-        sh 'git remote set-url origin git@github.com:harniman/mobile-deposit-api.git'
+        sh 'git config user.email "neil@gmail.com"'
+        sh 'git config user.name "neilhudson"'
+        sh 'git remote set-url origin git@github.com:neilhudson/mobile-deposit-api.git'
         sh "mkdir -p /data/mvn"
         writeFile file: 'settings.xml', text: "<settings><localRepository>/data/.m2repo</localRepository></settings>"
 
@@ -44,7 +44,7 @@ node('docker') {
             sh "ls -l ../target"
             sh "mv ../target/*-SNAPSHOT.jar  mobile-deposit-api.jar"
             sh "ls -l "
-            mobileDepositApiImage = docker.build "harniman/mobile-deposit-api:${buildVersion}"
+            mobileDepositApiImage = docker.build "neilhudson/mobile-deposit-api:${buildVersion}"
         }
 
         stage 'Test Docker image'
@@ -60,7 +60,7 @@ node('docker') {
                 --data-urlencode inspectData=\"\$(docker inspect $container.id)\" \
                 --data-urlencode environment=test \
                 --data-urlencode hostName=mymac \
-                --data-urlencode imageName=harniman/mobile-deposit-api"
+                --data-urlencode imageName=neilhudson/mobile-deposit-api"
         echo "Run cucumber tests here"
         
         sh "curl http://webhook:6e8d9beba74b7f0ae921e1d38a9c448f@mymac:8080/docker-traceability/submitContainerStatus \
@@ -68,12 +68,12 @@ node('docker') {
             --data-urlencode inspectData=\"\$(docker inspect $container.id)\" \
             --data-urlencode environment=test \
             --data-urlencode hostName=mymac \
-            --data-urlencode imageName=harniman/mobile-deposit-api"
+            --data-urlencode imageName=neilhudson/mobile-deposit-api"
 
             container.stop()
             
         stage 'Publish Docker image'
-        withDockerRegistry(registry: [credentialsId: 'dockerhub-harniman']) { 
+        withDockerRegistry(registry: [credentialsId: 'dockerhub-neilhudson']) { 
             mobileDepositApiImage.push() }
     }
     //  }
